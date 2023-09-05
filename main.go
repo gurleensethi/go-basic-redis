@@ -10,21 +10,33 @@ import (
 func main() {
 	ctx := context.Background()
 
-	rdb := redis.NewClient(&redis.Options{
+	redisClient := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
 
-	_, err := rdb.Incr(ctx, "count").Result()
+	pingResult, err := redisClient.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
 
-	count, err := rdb.Get(ctx, "count").Int()
+	fmt.Println("PING:", pingResult)
+
+	_, err = redisClient.Incr(ctx, "count").Result()
+	if err != nil {
+		panic(err)
+	}
+
+	count, err := redisClient.Get(ctx, "count").Int()
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("Count: %d\n", count)
+
+	err = redisClient.Close()
+	if err != nil {
+		panic(err)
+	}
 }
